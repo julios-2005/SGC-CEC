@@ -1,0 +1,315 @@
+/* Extraído sin rediseño desde panel-admin.html. */
+:host {
+        --azul: #002749;
+        --azul-oscuro: #001a30;
+        --gris-borde: #b9c2c3;
+        --gris-fondo: #ccd3d4;
+        --rojo: #c0392b;
+        --verde: #1e7e34;
+        --amarillo: #ffe000;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      :host {
+        font-family: var(--fuente-contenido);
+        background: var(--gris-fondo);
+        margin: 0;
+        color: #1c1c1c;
+      }
+      .contenedor {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 30px 32px 60px;
+      }
+      .encabezado-pagina {
+        margin: 0 0 20px;
+      }
+      .encabezado-pagina h1 {
+        font-family: var(--fuente-titulo);
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--azul);
+        margin: 0 0 4px;
+      }
+      p.subtitulo {
+        margin-top: 0;
+        color: #555;
+        font-size: 14px;
+      }
+      .barra-superior {
+        margin: 0 0 18px;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      input#buscador {
+        flex: 1;
+        min-width: 220px;
+        padding: 10px 14px;
+        border: 1px solid var(--gris-borde);
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      button#btnActualizar {
+        padding: 10px 18px;
+        background: var(--azul);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button#btnActualizar:hover {
+        background: var(--azul-oscuro);
+      }
+
+      select#filtroEstado {
+        padding: 10px 14px;
+        border: 1px solid var(--gris-borde);
+        border-radius: 6px;
+        font-size: 14px;
+        background: #fff;
+      }
+      a#btnVolverTabla {
+        color: var(--azul);
+        text-decoration: none;
+        font-size: 13.5px;
+        font-weight: 600;
+      }
+      a#btnVolverTabla:hover {
+        text-decoration: underline;
+      }
+
+      .contador {
+        margin: 0 0 14px;
+        font-size: 13px;
+        color: #666;
+      }
+
+      .tarjetas {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 16px;
+      }
+      .tarjeta {
+        background: #fff;
+        border-radius: 10px;
+        padding: 18px 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--gris-borde);
+      }
+      .tarjeta h3 {
+        margin: 0 0 4px;
+        font-size: 17px;
+        color: var(--azul-oscuro);
+      }
+      .tarjeta .etiqueta-tipo {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 9px;
+        border-radius: 20px;
+        background: #e8f0fb;
+        color: var(--azul);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .tarjeta .dato {
+        font-size: 13px;
+        color: #444;
+        margin: 3px 0;
+      }
+      .tarjeta .dato strong {
+        color: #1c1c1c;
+      }
+
+      .documentos {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px dashed var(--gris-borde);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .doc-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 12px;
+        border-radius: 6px;
+        background: var(--gris-fondo);
+        border: 1px solid var(--gris-borde);
+        color: var(--azul-oscuro);
+        text-decoration: none;
+        font-size: 12.5px;
+        font-weight: 600;
+        transition: background 0.15s ease;
+      }
+      .doc-btn:hover {
+        background: #e8f0fb;
+      }
+      .doc-btn.faltante {
+        color: #999;
+        background: #f8f8f8;
+        border-style: dashed;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      .badge-estado {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        margin-left: 8px;
+      }
+      .badge-estado.pendiente {
+        background: #fdf3d9;
+        color: var(--amarillo);
+      }
+      .badge-estado.aceptada {
+        background: #e6f4ea;
+        color: var(--verde);
+      }
+      .badge-estado.rechazada {
+        background: #fdecea;
+        color: var(--rojo);
+      }
+      .badge-estado.retirada {
+        background: #eceff1;
+        color: #546e7a;
+      }
+
+      .acciones-revision {
+        margin-top: 14px;
+        padding-top: 12px;
+        border-top: 1px dashed var(--gris-borde);
+        display: flex;
+        gap: 8px;
+      }
+      .btn-revision {
+        flex: 1;
+        padding: 9px 12px;
+        border-radius: 6px;
+        border: none;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.15s ease;
+      }
+      .btn-revision:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .btn-revision.aceptar {
+        background: var(--verde);
+        color: #fff;
+      }
+      .btn-revision.aceptar:hover:not(:disabled) {
+        background: #17652b;
+      }
+      .btn-revision.rechazar {
+        background: var(--rojo);
+        color: #fff;
+      }
+      .btn-revision.rechazar:hover:not(:disabled) {
+        background: #9c2e21;
+      }
+      .btn-revision.retirar {
+        background: #546e7a;
+        color: #fff;
+      }
+      .btn-revision.retirar:hover:not(:disabled) {
+        background: #3d525c;
+      }
+
+      #estado {
+        margin: 0 0 20px;
+        padding: 12px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        display: none;
+      }
+      #estado.error {
+        display: block;
+        background: #fdecea;
+        color: var(--rojo);
+        border: 1px solid #f5c6c1;
+      }
+      #estado.cargando {
+        display: block;
+        background: #eef3fa;
+        color: var(--azul-oscuro);
+        border: 1px solid #cfe0f5;
+      }
+
+      /* Modal para visualizar el documento sin salir de la página */
+      #modalFondo {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 999;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        overflow-y: auto;
+      }
+      #modalFondo.visible {
+        display: flex;
+      }
+      #modalContenido {
+        background: #fff;
+        border-radius: 10px;
+        max-width: 90vw;
+        max-height: 90dvh;
+        overflow: auto;
+        padding: 16px;
+        position: relative;
+      }
+      #modalContenido img,
+      #modalContenido iframe {
+        max-width: 80vw;
+        max-height: 80vh;
+        max-height: 80dvh;
+        display: block;
+        margin: 0 auto;
+        border-radius: 4px;
+      }
+      #modalContenido iframe {
+        width: 80vw;
+        height: 80vh;
+        height: 80dvh;
+        border: none;
+      }
+      #cerrarModal {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #555;
+        line-height: 1;
+      }
+      #tituloModal {
+        text-align: center;
+        font-size: 14px;
+        color: #444;
+        margin-bottom: 10px;
+        font-weight: 600;
+      }
+
+      @media (max-width: 768px) {
+        .contenedor {
+          padding: 22px 16px 48px;
+        }
+      }
+    

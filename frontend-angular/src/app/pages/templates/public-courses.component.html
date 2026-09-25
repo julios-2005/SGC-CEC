@@ -1,0 +1,29 @@
+<app-public-header />
+<div class="contenedor">
+  <div class="encabezado-pagina"><h1>Cursos Disponibles</h1></div>
+  <div class="grid-cursos">
+    @if (loading) { <div class="estado-carga">Cargando cursos disponibles...</div> }
+    @if(error){<div class="estado-vacio">{{error}}</div>} @if (!loading && !error && !planes.length) { <div class="estado-vacio">No hay cursos disponibles por el momento. Vuelve a revisar pronto.</div> }
+    @for (plan of planes; track plan.id) {
+      <a class="tarjeta-curso" routerLink="/inscripcion" [queryParams]="{planificacion: plan.id}">
+        <div class="foto-curso">
+          @if (plan.curso.foto) { <img [src]="courseImage(plan)" alt="" /> } @else { <span class="sin-foto">Sin foto</span> }
+        </div>
+        <div class="cuerpo-tarjeta">
+          <div class="chips">
+            <span class="chip modalidad">{{ modalityLabel(plan.modalidad) }}</span>
+            <span class="chip fechas">{{ plan.fechaInicio | date:'dd/MM/yyyy' }} – {{ plan.fechaFin | date:'dd/MM/yyyy' }}</span>
+          </div>
+          <h3>{{ plan.curso.nombre }}</h3>
+          <div class="fila-detalle"><b>Especialistas:</b> {{ plan.nombresDocentes || (plan.especialista ? plan.especialista.nombres + ' ' + plan.especialista.apellidos : 'Por asignar') }}</div>
+          <div class="fila-detalle"><b>Horario:</b> {{ plan.horario || '-' }}</div>
+          <div class="fila-detalle"><b>Cupos:</b> {{ plan.curso.cuposRestantes }} disponibles</div>
+          <div class="pie-tarjeta">
+            <span class="costo-curso">{{ plan.curso.costo | currency:'USD' }}</span>
+            <span class="nota-descuento">Aplica descuento según tipo de participante</span>
+          </div>
+        </div>
+      </a>
+    }
+  </div>
+</div>

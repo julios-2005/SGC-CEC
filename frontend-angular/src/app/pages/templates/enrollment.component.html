@@ -1,0 +1,83 @@
+<app-public-header />
+<div class="contenedor">
+  <h1>Formulario de Inscripción a Curso</h1>
+  <form #enrollmentElement #enrollmentForm="ngForm" (ngSubmit)="submit(enrollmentForm, enrollmentElement)" novalidate>
+    <label for="tipoUsuario">Tipo de Usuario</label>
+    <select id="tipoUsuario" name="tipoUsuario" [ngModel]="model.tipoUsuario" (ngModelChange)="typeChanged($event, additionalDocument)" required>
+      <option value="" disabled>Seleccione...</option>
+      @for (tipo of tipos; track tipo.value) { <option [value]="tipo.value">{{ tipo.label }}</option> }
+    </select>
+
+    <label for="nombreCompleto">Nombre Completo</label>
+    <input type="text" id="nombreCompleto" name="nombreCompleto" [(ngModel)]="model.nombreCompleto" maxlength="150" required placeholder="Ej: Joarkel Kenneth Orrala Clemente" />
+    <div class="ayuda">Escriba primero sus Nombres y luego sus Apellidos.</div>
+
+    <label for="idPlanificacion">Curso <span style="color:var(--rojo)">*</span></label>
+    <select id="idPlanificacion" name="idPlanificacion" [(ngModel)]="model.idPlanificacion" required>
+      <option [ngValue]="null" disabled>{{ optionsLoading ? "Cargando cursos..." : "Seleccione un curso..." }}</option>
+      @for (plan of planes; track plan.id) { <option [ngValue]="plan.id">{{ plan.curso.nombre }} — {{ plan.fechaInicio | date:'dd/MM/yyyy' }}</option> }
+    </select>
+    <div class="ayuda">Selecciona un curso de la lista. Si no aparece el curso que buscas, revisa <a routerLink="/cursos-disponibles">el catálogo de cursos</a>.</div>
+
+    <label for="cedula">Documento de identidad</label>
+    <input type="text" id="cedula" name="cedula" [(ngModel)]="model.cedula" maxlength="20" placeholder="Cédula o número de pasaporte" required />
+    <div class="ayuda">Ecuatorianos: cédula de 10 dígitos. Extranjeros: número de pasaporte.</div>
+
+    <label for="telefono">Número de WhatsApp</label>
+    <input type="tel" id="telefono" name="telefono" [(ngModel)]="model.telefono" maxlength="20" placeholder="+593 99 123 4567" required />
+    <div class="ayuda">Incluya el código de país. Ej.: +593 99 123 4567 (Ecuador), +57 300 123 4567 (Colombia), +1 305 123 4567 (EE. UU.)</div>
+
+    <label for="correoElectronico">Correo Electrónico</label>
+    <input type="email" id="correoElectronico" name="correoElectronico" [(ngModel)]="model.correoElectronico" maxlength="150" email required />
+    <div class="ayuda">Aquí recibirás tu comprobante de matrícula si tu inscripción es aceptada.</div>
+
+    <label for="direccion">Dirección</label>
+    <input type="text" id="direccion" name="direccion" [(ngModel)]="model.direccion" maxlength="250" required />
+
+    <label for="sexo">Sexo</label>
+    <select id="sexo" name="sexo" [(ngModel)]="model.sexo" required>
+      <option value="" disabled>Seleccione...</option><option value="MASCULINO">Masculino</option><option value="FEMENINO">Femenino</option>
+    </select>
+
+    <div id="resumenPrecio" [class.visible]="ready && selectedPlan && model.tipoUsuario">
+      <div class="fila"><span>Costo del curso</span><span>{{ courseCost | currency:'USD' }}</span></div>
+      <div class="fila"><span>Descuento ({{ discountPercentage }}%)</span><span>- {{ discountAmount | currency:'USD' }}</span></div>
+      <div class="fila total"><span>Total a pagar</span><span>{{ totalToPay | currency:'USD' }}</span></div>
+    </div>
+
+    <div id="datosPago" [class.visible]="ready && selectedPlan && model.tipoUsuario">
+      <div class="dp-encabezado"><div class="dp-etiqueta">Datos de pago</div><div class="dp-curso">{{ selectedPlan?.curso?.nombre || '-' }}</div></div>
+      <div class="dp-cuenta-fila"><span><b>Banco Pacífico</b> - Cuenta Corriente</span></div>
+      <div class="dp-cuenta-fila"><span>Datos cuenta:</span><span class="dp-numero-cuenta">N. 7462425</span></div>
+      <div class="dp-codigo-fila">Código del curso: <b>{{ selectedPlan?.curso?.codigo || '-' }}</b></div>
+      <div class="dp-codigo-ayuda">Colocar este código en el detalle o descripción de la transferencia.</div>
+      <div class="dp-datos">
+        <div><b>Razón Social:</b> Empresa Pública de Obras, Bienes y Servicios Santa Elena EP.</div>
+        <div><b>RUC:</b> 2460002390001</div><div><b>Correo:</b> cec&#64;upse.edu.ec</div>
+        <div><b>Dirección:</b> Av. Eleodoro Solórzano, Ciudadela Universitaria.</div>
+      </div>
+      <div class="dp-nota">▸ Envía tu comprobante de pago a <b>{{ selectedPlan?.coordinador?.correo || 'el coordinador del curso' }}</b> para completar tu inscripción.</div>
+    </div>
+
+    <div class="bloque-pago-seguro" [class.visible]="ready && selectedPlan && model.tipoUsuario">
+      <button type="button" id="btnPagoSeguro" class="btn-pago-seguro" (click)="openPayment()">Pago seguro con tarjeta de crédito/débito</button>
+      <div class="ayuda">Opcional: mira un video tutorial y paga en línea con tarjeta. Si prefieres, puedes pagar por otros medios y solo adjuntar tu comprobante abajo.</div>
+    </div>
+
+    <label for="comprobantePago">Comprobante de Pago</label>
+    <input type="file" id="comprobantePago" accept=".jpg,.jpeg,.png,.pdf" (change)="file($event, 'comprobantePago')" required />
+    <div class="ayuda">Formatos permitidos: JPG, PNG o PDF. Máximo 5MB.</div>
+
+    <label for="copiaCedula">Copia de Documento de Identidad</label>
+    <input type="file" id="copiaCedula" accept=".jpg,.jpeg,.png,.pdf" (change)="file($event, 'copiaCedula')" required />
+    <div class="ayuda">Formatos permitidos: JPG, PNG o PDF. Máximo 5MB.</div>
+
+    <div class="campo-condicional" [class.visible]="documentLabel">
+      <label for="documentoAdicional">{{ documentLabel }}{{ documentOptional ? ' (opcional)' : '' }}</label>
+      <input #additionalDocument type="file" id="documentoAdicional" accept=".jpg,.jpeg,.png,.pdf" (change)="file($event, 'documentoAdicional')" [required]="!!documentLabel && !documentOptional" />
+      <div class="ayuda">Formatos: JPG, PNG o PDF. Máximo 5MB.</div>
+    </div>
+
+    <button type="submit" id="btnEnviar" [disabled]="loading || !ready">{{ loading ? 'Enviando...' : 'Enviar Inscripción' }}</button>
+  </form>
+</div>

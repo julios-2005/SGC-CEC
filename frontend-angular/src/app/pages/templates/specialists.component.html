@@ -1,0 +1,61 @@
+<div class="contenedor">
+  <div class="encabezado-pagina">
+    <div>
+      <h1>Gestión de Especialistas</h1>
+      <p>Registro y administración de especialistas</p>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap">
+      <button type="button" class="boton-exportar" (click)="api.download('especialistas/exportar', 'especialistas.xlsx', filters)">Exportar a Excel</button>
+      <button type="button" style="background:#fff;color:var(--azul-900);border:1px solid var(--borde)" (click)="api.openFile('especialistas/listado-pdf')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        Imprimir listado
+      </button>
+      <a routerLink="/consulta-especialistas" style="background:#fff;color:var(--azul-900);border:1px solid var(--borde);text-decoration:none;display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:9px;font-size:14px;font-weight:700">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        Consulta Especialistas
+      </a>
+      <button type="button" id="btnAgregar" (click)="open()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        Agregar especialista
+      </button>
+    </div>
+  </div>
+
+  <div class="barra-busqueda">
+    <input type="text" placeholder="Buscar por nombre, cédula, especialidad o área..." [(ngModel)]="filters.texto" (ngModelChange)="scheduleLoad()" />
+    <select [ngModel]="filters.estado" (ngModelChange)="filters.estado = $event; load()"><option value="">Todos los estados</option><option value="true">Activo</option><option value="false">Disponible</option></select>
+    <select [ngModel]="filters.nacionalidad" (ngModelChange)="filters.nacionalidad = $event; load()"><option value="">Todas las nacionalidades</option>@for (country of countries; track country.code) { <option [value]="country.code">{{ country.name }}</option> }</select>
+    <select [ngModel]="filters.sort" (ngModelChange)="filters.sort = $event; load()" title="Ordenar"><option value="id,desc">Avanzado: más nuevos primero</option><option value="id,asc">Avanzado: más antiguos primero</option><option value="nombres,asc">Avanzado: alfabético (nombres)</option></select>
+    <button type="button" id="btnLimpiarFiltros" (click)="clearFilters()">Limpiar filtros</button>
+  </div>
+
+  @if (error && !modalOpen) { <div id="estadoError" style="display:block">{{ error }}</div> }
+  <div class="tabla-envoltorio"><table>
+    <thead><tr><th>Documento</th><th>Nombres</th><th>Apellidos</th><th>WhatsApp</th><th>Correo</th><th>Especialidad</th><th>Área de conocimiento</th><th>Nacionalidad</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <tbody>
+      @for (item of items; track item.id) {
+        <tr><td>{{ item.cedula }}</td><td class="nombre">{{ item.nombres }}</td><td>{{ item.apellidos }}</td><td>{{ item.telefono || '-' }}</td><td>{{ item.correo || '-' }}</td><td>{{ item.especialidad || '-' }}</td><td>{{ item.areaConocimiento || '-' }}</td><td>{{ item.gentilicioNacionalidad || '-' }}</td><td><span class="badge-estado" [class.activo]="item.estado" [class.inactivo]="!item.estado" title="Se actualiza automáticamente según sus planificaciones en curso">{{ item.estado ? 'Activo' : 'Disponible' }}</span></td><td><div class="acciones"><button class="btn-accion editar" (click)="open(item)">Editar</button><button class="btn-accion eliminar" (click)="remove(item)">Eliminar</button></div></td></tr>
+      } @empty { <tr><td colspan="10" class="estado-vacio">{{ loading ? 'Cargando especialistas...' : 'No hay especialistas registrados.' }}</td></tr> }
+    </tbody>
+  </table></div>
+  <div class="paginacion"><button type="button" [disabled]="page === 0" (click)="load(page - 1)">&larr; Anterior</button><span>Página {{ page + 1 }} de {{ totalPages || 1 }}</span><button type="button" [disabled]="page + 1 >= totalPages" (click)="load(page + 1)">Siguiente &rarr;</button></div>
+</div>
+
+@if (modalOpen) {
+  <div id="modalFondo" class="visible" (click)="$event.target === $event.currentTarget ? close() : null">
+    <div id="modalTarjeta">
+      <button id="cerrarModal" type="button" title="Cerrar" (click)="close()">&times;</button>
+      <h2>{{ editing ? 'Editar especialista' : 'Agregar especialista' }}</h2>
+      <p class="subt">Completa los datos del especialista.</p>
+      @if (error) { <div id="mensajeFormError" style="display:block">{{ error }}</div> }
+      <form #specialistForm="ngForm" (ngSubmit)="save(specialistForm)" novalidate>
+        <div class="fila-doble"><div class="campo-form"><label>Documento de identidad <span class="req">*</span></label><input name="cedula" [(ngModel)]="form.cedula" maxlength="20" placeholder="Cédula o pasaporte" required /></div><div class="campo-form"><label>Especialidad</label><input name="especialidad" [(ngModel)]="form.especialidad" maxlength="100" /></div></div>
+        <div class="campo-form"><label>Área de conocimiento</label><input name="areaConocimiento" [(ngModel)]="form.areaConocimiento" maxlength="150" placeholder="Ej: Tecnologías de la Información" /></div>
+        <div class="fila-doble"><div class="campo-form"><label>Nombres <span class="req">*</span></label><input name="nombres" [(ngModel)]="form.nombres" maxlength="80" required /></div><div class="campo-form"><label>Apellidos <span class="req">*</span></label><input name="apellidos" [(ngModel)]="form.apellidos" maxlength="80" required /></div></div>
+        <div class="fila-doble"><div class="campo-form"><label>Número de WhatsApp</label><input name="telefono" type="tel" [(ngModel)]="form.telefono" maxlength="20" placeholder="+593 99 123 4567" /></div><div class="campo-form"><label>Correo</label><input name="correo" type="email" [(ngModel)]="form.correo" maxlength="100" email /></div></div>
+        <div class="campo-form"><label>Nacionalidad</label><select name="paisNacionalidad" [(ngModel)]="form.paisNacionalidad"><option value="">Sin especificar</option>@for (country of countries; track country.code) { <option [value]="country.code">{{ country.name }}</option> }</select></div>
+        <button type="submit" id="btnGuardar" [disabled]="saving">{{ saving ? 'Guardando...' : 'Guardar especialista' }}</button>
+      </form>
+    </div>
+  </div>
+}

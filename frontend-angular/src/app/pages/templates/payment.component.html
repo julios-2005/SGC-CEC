@@ -1,0 +1,14 @@
+<app-public-header />
+<main class="contenido-pago">
+  <div class="tarjeta-pago">
+    <h1>Pago en línea con tarjeta</h1>
+    <p class="subtitulo">Mira el siguiente video para conocer el paso a paso de cómo realizar tu pago en línea de forma segura. Luego, usa el botón para ir a la página oficial de pagos.</p>
+    <div class="video-envoltorio">
+      <video controls preload="metadata"><source src="/assets/videos/pago_en_linea_con_tarjeta.mp4" type="video/mp4" /><div class="video-no-disponible">Tu navegador no puede reproducir este video.</div></video>
+    </div>
+    <p class="nota-video">Si el video no se reproduce, puedes continuar directamente con tu pago usando el botón de abajo.</p>
+    <hr class="separador-pago" />
+    <a class="btn-pago-externo" [href]="api.paymentUrl" target="_blank" rel="noopener noreferrer">Ir a la página de pagos</a>
+    <div><a class="btn-volver" routerLink="/inscripcion">← Volver al formulario de inscripción</a></div>
+  </div>
+</main>

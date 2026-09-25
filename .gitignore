@@ -1,0 +1,17 @@
+# Build
+/target/
+/backend-springboot/target/
+
+# Documentos subidos por usuarios (PII: cédulas, comprobantes de pago, etc.)
+/uploads/*
+!/uploads/.gitkeep
+
+# Configuración local con secretos (no versionar nunca)
+application-local.properties
+.env
+/backend-springboot/.env.local
+
+# IDE (ya cubierto en .idea/.gitignore, se repite por si se borra esa carpeta)
+.idea/
+*.iml
+.vscode/

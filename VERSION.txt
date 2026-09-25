@@ -1,0 +1,6 @@
+SGC-CEC-PLUS-ANGULAR
+Entrega: v14-excel-y-transferencias-cec
+Fecha: 2026-09-15
+Backend: Java 17 / Spring Boot 3.2.5
+Frontend: Angular 22.1.x
+Historial de cambios: ver el log de git (git log)

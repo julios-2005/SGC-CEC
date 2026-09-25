@@ -1,0 +1,39 @@
+<div class="panel-marca">
+  <h1 class="sr-only">Sistema de Gestión de Capacitaciones - UPSE</h1>
+  <div class="pie-marca">© 2026 UPSE — Centro de Educación Continua. Acceso restringido a personal autorizado.</div>
+</div>
+
+<div class="panel-formulario">
+  <div class="tarjeta-login">
+    <h2>Iniciar sesión</h2>
+    <p class="subt">Ingresa tus credenciales para acceder al sistema.</p>
+    <div id="mensajeError" [style.display]="error ? 'block' : 'none'">{{ error }}</div>
+
+    <form #loginForm="ngForm" (ngSubmit)="submit(loginForm)" novalidate>
+      <div class="campo">
+        <label for="usuario">Usuario</label>
+        <div class="campo-input">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <input type="text" id="usuario" name="usuario" maxlength="50" [(ngModel)]="usuario" placeholder="usuario.admin" autocomplete="username" required />
+        </div>
+      </div>
+
+      <div class="campo">
+        <label for="clave">Contraseña</label>
+        <div class="campo-input">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <input type="password" id="clave" name="clave" [(ngModel)]="password" placeholder="••••••••" autocomplete="current-password" required />
+        </div>
+      </div>
+
+      <div class="fila-opciones">
+        <label class="recordar"><input type="checkbox" style="width:auto;padding:0" /> Recordarme</label>
+      </div>
+      <button type="submit" id="btnIngresar" [disabled]="loading">{{ loading ? 'Verificando...' : 'Ingresar' }}</button>
+    </form>
+  </div>
+</div>

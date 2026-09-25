@@ -1,0 +1,75 @@
+<div class="contenedor">
+<div class="encabezado-pagina">
+  <div><h1>Gestión de Cursos</h1><p>Registro y administración de los cursos</p></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button type="button" class="boton-exportar" (click)="api.download('cursos/exportar','cursos.xlsx',filters)">Exportar a Excel</button>
+    <button type="button" (click)="api.openFile('cursos/listado-pdf')" style="background:#fff;color:var(--azul-900);border:1px solid var(--borde);display:inline-flex;align-items:center;gap:8px;padding:12px 20px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer">Imprimir listado</button>
+    <button type="button" id="btnAgregar" (click)="open()">＋ Agregar curso</button>
+  </div>
+</div>
+
+<div class="barra-busqueda">
+  <input type="text" placeholder="Buscar por nombre, código..." [(ngModel)]="filters.texto" (ngModelChange)="scheduleLoad()" />
+  <select [ngModel]="filters.estado" (ngModelChange)="filters.estado = $event; load()"><option value="">Todos los estados</option><option value="EN_ESPERA">En espera</option><option value="EN_PROCESO">En proceso</option><option value="FINALIZADO">Finalizado</option></select>
+  <select [ngModel]="filters.modalidad" (ngModelChange)="filters.modalidad = $event; load()"><option value="">Todas las modalidades</option><option value="PRESENCIAL">Presencial</option><option value="VIRTUAL">Virtual</option><option value="HIBRIDO">Híbrido</option></select>
+  <select title="Ordenar" [ngModel]="filters.sort" (ngModelChange)="filters.sort = $event; load()"><option value="fechaRegistro,desc">Avanzado: más nuevos primero</option><option value="fechaRegistro,asc">Avanzado: más antiguos primero</option><option value="nombre,asc">Avanzado: alfabético (nombre)</option></select>
+  <button type="button" id="btnLimpiarFiltros" (click)="clearFilters()">Limpiar filtros</button>
+</div>
+
+@if (error && !modalOpen) { <div id="estadoError" style="display:block">{{ error }}</div> }
+<div class="tabla-envoltorio">
+  <table>
+    <thead><tr><th>Foto</th><th>Nombre</th><th>Código</th><th>Horas</th><th>Costo</th><th>Cupos</th><th>Modalidad</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <tbody>
+      @for (item of items; track item.idCurso) {
+        <tr>
+          <td>@if(item.foto){<img [src]="courseImage(item)" alt="" style="width:44px;height:44px;border-radius:6px;object-fit:cover" />}@else{<span style="color:var(--texto-suave);font-size:11px">Sin foto</span>}</td>
+          <td class="nombre">{{ item.nombre }}@if(item.ambito){<br/><small>{{item.ambito === 'INTERNACIONAL' ? 'Internacional' : 'Nacional'}}</small>}</td><td>{{ item.codigo }}</td><td>{{ item.horas }}</td><td>{{ item.costo | currency:'USD' }}</td>
+          <td><div class="cupos-barra"><span class="cupos-texto">{{ item.cuposRestantes }} / {{ item.cuposTotales }} disponibles</span><div class="cupos-pista"><div class="cupos-relleno" [style.width.%]="occupancy(item)"></div></div></div></td>
+          <td><span class="badge-modalidad">{{ modalityLabel(item.modalidad) }}</span></td>
+          <td><span class="badge-estado" [class.espera]="item.estado==='EN_ESPERA'" [class.proceso]="item.estado==='EN_PROCESO'" [class.finalizado]="item.estado==='FINALIZADO'">{{ stateLabel(item.estado) }}</span></td>
+          <td><div class="acciones"><button class="btn-accion editar" type="button" (click)="open(item)">Editar</button><button class="btn-accion eliminar" type="button" (click)="remove(item)">Eliminar</button></div></td>
+        </tr>
+      } @empty { <tr><td colspan="9" class="estado-carga">{{ loading ? 'Cargando cursos...' : 'No hay cursos para mostrar.' }}</td></tr> }
+    </tbody>
+  </table>
+</div>
+
+<div class="paginacion">
+  <button type="button" [disabled]="page <= 0" (click)="load(page - 1)">← Anterior</button>
+  <span>Página {{ page + 1 }} de {{ totalPages || 1 }}</span>
+  <button type="button" [disabled]="page + 1 >= totalPages" (click)="load(page + 1)">Siguiente →</button>
+</div>
+
+</div>
+
+@if (modalOpen) {
+<div id="modalFondo" class="visible" (click)="onBackdropClick($event)">
+  <div id="modalTarjeta">
+    <button id="cerrarModal" type="button" title="Cerrar" (click)="close()">×</button>
+    <h2>{{ editing ? 'Editar curso' : 'Agregar curso' }}</h2><p class="subt">Completa los datos del curso.</p>
+    @if(error){<div #courseError id="mensajeFormError" role="alert" tabindex="-1" style="display:block">{{ error }}</div>}
+    <form #courseForm="ngForm" (ngSubmit)="save(courseForm)" novalidate>
+      <div class="campo-form"><label>Nombre del curso <span class="req">*</span></label><input type="text" name="nombre" [(ngModel)]="form.nombre" maxlength="255" required /></div>
+      <div class="campo-form"><label>Código del curso <span class="req">*</span></label><input name="codigo" [(ngModel)]="form.codigo" maxlength="20" placeholder="Ej. 009-02421" required /><small class="ayuda">El estudiante debe colocarlo en el detalle de la transferencia al pagar.</small></div>
+      <div class="fila-doble">
+        <div class="campo-form"><label>Horas <span class="req">*</span></label><input name="horas" type="number" min="1" step="1" [(ngModel)]="form.horas" required /></div>
+        <div class="campo-form"><label>Costo ($) <span class="req">*</span></label><input name="costo" type="number" min="0" step="0.01" [(ngModel)]="form.costo" [readOnly]="freeCourse" required /></div>
+      </div>
+      <div class="campo-form campo-gratuito"><label class="etiqueta-gratuito"><input type="checkbox" name="cursoGratuito" [ngModel]="freeCourse" (ngModelChange)="toggleFreeCourse($event)" /> Curso gratuito</label><small class="ayuda">Marque esta opción si el curso no tiene costo para los participantes. El costo queda en $0.00.</small></div>
+      <div class="fila-doble">
+        <div class="campo-form"><label>Cupos totales <span class="req">*</span></label><input name="cuposTotales" type="number" min="1" step="1" [(ngModel)]="form.cuposTotales" required /></div>
+        <div class="campo-form"><label>Cupos restantes</label><input name="cuposRestantes" type="number" min="0" step="1" [max]="form.cuposTotales" [(ngModel)]="form.cuposRestantes" /><small class="ayuda">Vacío: al crear se usa el total; al editar se conservan los cupos ocupados.</small></div>
+      </div>
+      <div class="fila-doble">
+        <div class="campo-form"><label>Modalidad <span class="req">*</span></label><select name="modalidad" [(ngModel)]="form.modalidad" required><option value="">Selecciona una modalidad</option><option value="PRESENCIAL">Presencial</option><option value="VIRTUAL">Virtual</option><option value="HIBRIDO">Híbrido</option></select></div>
+        <div class="campo-form"><label>Estado <span class="req">*</span></label><select name="estado" [(ngModel)]="form.estado" required><option value="EN_ESPERA">En espera</option><option value="EN_PROCESO">En proceso</option><option value="FINALIZADO">Finalizado</option></select></div>
+      </div>
+      <div class="campo-form"><label>Foto del curso</label><input type="file" accept=".jpg,.jpeg,.png" (change)="selectPhoto($event)" /><small class="ayuda">Opcional. Se muestra en el catálogo público de cursos.</small>@if(photoPreview || editing?.foto){<img id="previewFoto" [src]="photoPreview || courseImage(editing!)" alt="Vista previa" style="display:block;max-width:110px;border-radius:8px;margin-top:8px" />}</div>
+      <div class="campo-form"><label>Ámbito del curso</label><select name="ambito" [(ngModel)]="form.ambito" [required]="!editing">@if(editing && !editing.ambito){<option [ngValue]="undefined">Sin especificar</option>}<option value="NACIONAL">Nacional</option><option value="INTERNACIONAL">Internacional</option></select></div>
+      <p class="ayuda">Cada planificación tendrá su propio reporte económico automático. Los especialistas se eligen al registrar la planificación, no aquí.</p>
+      <button type="submit" id="btnGuardar" [disabled]="saving">{{ saving ? 'Guardando...' : 'Guardar curso' }}</button>
+    </form>
+  </div>
+</div>
+}

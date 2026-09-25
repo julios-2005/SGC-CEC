@@ -1,0 +1,75 @@
+/* Extraído sin rediseño desde consulta-coordinadores.html. */
+:host {
+        --azul-950: #001a30; --azul-900: #002749; --azul-800: #0a3a63; --azul-700: #144a7a;
+        --amarillo: #ffe000; --amarillo-suave: #ffea4d;
+        --celeste: #ccd3d4; --celeste-carta: #ffffff;
+        --texto: #1c2430; --texto-suave: #6b7280;
+        --borde: #b9c2c3; --error: #b0413e; --verde: #1e7e34;
+      }
+      * { box-sizing: border-box; }
+      :host { margin: 0; }
+      :host { font-family: var(--fuente-contenido); background: var(--celeste); color: var(--texto); min-height: 100vh; }
+
+      .contenedor { max-width: 1180px; margin: 0 auto; padding: 30px 32px 60px; }
+      .encabezado-pagina { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 14px; }
+      .encabezado-pagina h1 { font-family: var(--fuente-titulo); font-size: 24px; font-weight: 600; margin: 0 0 4px; color: var(--azul-900); }
+      .encabezado-pagina p { margin: 0; font-size: 13.5px; color: var(--texto-suave); }
+
+      a.volver-listado {
+        color: var(--azul-700); text-decoration: none; font-size: 13px; font-weight: 600;
+        display: inline-flex; align-items: center; gap: 6px; margin-bottom: 18px;
+      }
+      a.volver-listado:hover { color: var(--azul-950); }
+
+      .barra-consulta {
+        display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
+        background: var(--celeste-carta); border: 1px solid var(--borde); border-radius: 12px;
+        padding: 18px 20px; margin-bottom: 22px;
+        box-shadow: 0 4px 18px -12px rgba(0, 39, 73,.25);
+      }
+      .campo-combo { flex: 1; min-width: 260px; }
+      .campo-combo label { display: block; font-size: 12.5px; font-weight: 700; color: var(--azul-900); margin-bottom: 6px; }
+      .campo-combo select {
+        width: 100%; padding: 10px 14px; border: 1px solid var(--borde); border-radius: 8px;
+        font-size: 14px; font-family: var(--fuente-contenido); background: #fff; color: var(--texto);
+      }
+      .campo-combo select:focus { outline: none; border-color: var(--amarillo); box-shadow: 0 0 0 3px rgba(255, 224, 0,.15); }
+
+      button#btnImprimir {
+        background: var(--azul-900); color: #fff; border: none;
+        padding: 11px 20px; border-radius: 9px; font-size: 14px; font-weight: 700;
+        cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background .15s;
+        white-space: nowrap;
+      }
+      button#btnImprimir:hover { background: var(--azul-950); }
+      button#btnImprimir:disabled { background: #b9c0c9; cursor: not-allowed; }
+
+      .ficha-coordinador {
+        display: none;
+        background: var(--celeste-carta); border: 1px solid var(--borde); border-radius: 12px;
+        padding: 16px 20px; margin-bottom: 18px; font-size: 13.5px;
+        box-shadow: 0 4px 18px -12px rgba(0, 39, 73,.25);
+      }
+      .ficha-coordinador.visible { display: flex; flex-wrap: wrap; gap: 6px 28px; }
+      .ficha-coordinador b { color: var(--azul-900); }
+
+      .tabla-envoltorio { background: var(--celeste-carta); border: 1px solid var(--borde); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 18px -12px rgba(0, 39, 73,.25); overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+      thead tr { background: var(--azul-900); }
+      thead th { color: #fff; text-align: left; padding: 13px 16px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+      tbody tr { border-bottom: 1px solid var(--borde); transition: background .12s; }
+      tbody tr:last-child { border-bottom: none; }
+      tbody tr:hover { background: #e3e9ea; }
+      tbody td { padding: 13px 16px; color: var(--texto); vertical-align: middle; }
+      td.nombre { font-weight: 600; color: var(--azul-900); }
+
+      .contador { font-size: 13px; color: var(--texto-suave); margin-bottom: 10px; }
+      .estado-vacio, .estado-carga { padding: 50px 20px; text-align: center; color: var(--texto-suave); font-size: 14px; }
+      #estadoError { display: none; max-width: 1180px; margin: 0 auto 18px; padding: 12px 16px; border-radius: 8px; background: #fbeceb; border: 1px solid #f0c9c6; color: var(--error); font-size: 13.5px; }
+
+      @media (max-width: 720px) {
+        .contenedor { padding: 22px 16px 48px; }
+        .barra-consulta { align-items: stretch; }
+        button#btnImprimir { justify-content: center; }
+      }
+    

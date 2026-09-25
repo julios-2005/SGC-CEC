@@ -1,0 +1,62 @@
+/* =========================================================================
+   PLANTILLA para dar de alta un nuevo usuario.
+   Este archivo NO contiene datos reales a propósito: es un ejemplo genérico
+   para copiar y completar localmente cuando haga falta, sin volver a
+   versionar nombres/cédulas reales ni contraseñas (ni siquiera con hash
+   en un comentario al lado).
+
+   IMPORTANTE (desde la refactorización de Usuario/Coordinador):
+   Un Usuario (cuenta de acceso) ya NO necesita un Coordinador asociado.
+   - ADMIN_GENERAL: id_coordinador puede ser NULL. Usa nombre_completo para
+     que tenga un nombre propio que mostrar (opcional, pero recomendado).
+   - COORDINADOR: id_coordinador SÍ es obligatorio, y debe apuntar a un
+     coordinador que todavía no tenga otra cuenta (relación 1:1).
+
+   Flujo recomendado:
+   1) Generar la contraseña temporal + su hash BCrypt con:
+        python3 scripts/generar_usuario_admin.py
+      (nunca escribas la contraseña en texto plano en un archivo)
+   2) Usa la sección A (ADMIN_GENERAL, sin coordinador) o la B (COORDINADOR,
+      con coordinador), según el caso.
+   3) Entregar la contraseña temporal al usuario por un canal seguro.
+      debe_cambiar_contrasena = TRUE ya obliga a cambiarla en el primer login.
+   ========================================================================= */
+
+-- =========================================================================
+-- A) ADMIN_GENERAL sin coordinador (caso más simple, no toca la tabla
+--    coordinadores para nada)
+-- =========================================================================
+INSERT INTO usuarios (nombre_usuario, contrasena, id_coordinador, nombre_completo, rol, estado, debe_cambiar_contrasena)
+VALUES (
+    '<nombre.usuario>',
+    '<HASH_BCRYPT>',           -- viene del script generar_usuario_admin.py
+    NULL,
+    '<Nombre Completo>',       -- opcional; si se deja NULL, se muestra el nombre_usuario
+    'ADMIN_GENERAL', TRUE, TRUE
+);
+
+-- =========================================================================
+-- B) COORDINADOR con coordinador asociado (id_coordinador obligatorio)
+-- =========================================================================
+-- 1) Coordinador (la persona real detrás de la cuenta)
+INSERT INTO coordinadores (cedula, nombres, apellidos, estado)
+VALUES ('<CEDULA>', '<NOMBRES>', '<APELLIDOS>', TRUE);
+
+-- 2) Usuario (login) — <HASH_BCRYPT> viene del script generar_usuario_admin.py
+INSERT INTO usuarios (nombre_usuario, contrasena, id_coordinador, rol, estado, debe_cambiar_contrasena)
+VALUES (
+    '<nombre.usuario>',
+    '<HASH_BCRYPT>',
+    (SELECT id FROM coordinadores WHERE cedula = '<CEDULA>'),
+    'COORDINADOR', TRUE, TRUE
+);
+
+-- =========================================================================
+-- Verificación (funciona para ambos casos: LEFT JOIN porque el coordinador
+-- ahora es opcional; un ADMIN_GENERAL sin coordinador sale con esas
+-- columnas en NULL en vez de desaparecer de los resultados)
+-- =========================================================================
+SELECT u.nombre_usuario, u.rol, u.nombre_completo, c.nombres, c.apellidos, c.cedula
+FROM usuarios u
+LEFT JOIN coordinadores c ON c.id = u.id_coordinador
+ORDER BY u.id;
