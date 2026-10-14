@@ -1,0 +1,17 @@
+[Unit]
+Description=SGC-CEC WebService Spring Boot
+After=network.target
+
+[Service]
+Type=simple
+User=cec
+Group=cec
+EnvironmentFile=/etc/sgc-cec/backend.env
+WorkingDirectory=/opt/sgc-cec
+ExecStart=/usr/bin/java -jar /opt/sgc-cec/inscripciones-backend-1.0.0.jar
+Restart=on-failure
+RestartSec=5
+SuccessExitStatus=143
+
+[Install]
+WantedBy=multi-user.target

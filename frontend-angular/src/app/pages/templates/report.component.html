@@ -1,0 +1,62 @@
+<div class="contenedor-principal"><main class="contenido-principal"><div class="contenedor-informe">
+  @if(error){<div id="estadoError" style="display:block">{{error}}</div>}
+  @if(!detail){<div id="vistaResumen">
+    <div class="encabezado-pagina"><div><h1>Informe Económico</h1></div><button type="button" class="boton-exportar" (click)="export()">Exportar a Excel</button></div>
+    <p class="subtitulo-ayuda">Toque una fila para ver el detalle del curso.</p>
+    <label>Año del consolidado <input class="cec-control" aria-label="Año del consolidado" type="number" min="2000" max="2100" step="1" [(ngModel)]="reportYear" (change)="load()" /></label>
+    <p class="cec-note">@if(annualView){El TOTAL y la UTILIDAD CEC corresponden únicamente a los cursos dictados en {{reportYear}}. Los cursos de años anteriores no se muestran en esta tabla.}@else{El TOTAL corresponde a los resultados filtrados. Quite los filtros para editar los gastos anuales del CEC.} Los participantes e ingresos de nuevas planificaciones se contabilizan al aceptar la inscripción.</p>
+    <div class="barra-busqueda"><input type="text" placeholder="Buscar por curso..." [(ngModel)]="filters.texto" (ngModelChange)="scheduleLoad()" /><select [ngModel]="filters.modalidad" (ngModelChange)="filters.modalidad = $event; load()"><option value="">Todas las modalidades</option><option value="PRESENCIAL">Presencial</option><option value="VIRTUAL">Virtual</option><option value="HIBRIDO">Híbrido</option></select><span class="filtro-fecha">Inicio desde <input type="date" [ngModel]="filters.fechaDesde" (ngModelChange)="filters.fechaDesde = $event; load()" /> hasta <input type="date" [ngModel]="filters.fechaHasta" (ngModelChange)="filters.fechaHasta = $event; load()" /></span><button type="button" id="btnLimpiarFiltrosInforme" (click)="clearFilters()">Limpiar filtros</button></div>
+    <div class="tabla-envoltorio"><table><thead><tr><th>Cursos / Diplomados</th><th>Modalidad</th><th>Fecha inicio</th><th class="num">Cantidad de participantes</th><th>Ingresos</th><th>Egresos</th><th>Utilidad</th></tr></thead><tbody>
+      @for(item of items;track (item.idPlanificacion ?? ('ref-' + item.idInforme))){<tr class="fila-clic" (click)="open(item)"><td class="nombre">{{item.nombreCurso}}</td><td><span class="badge-modalidad">{{modalityLabel(item.modalidad)}}</span></td><td>{{item.fechaInicio ? (item.fechaInicio | date:'dd/MM/yyyy') : 'Sin especificar'}}</td><td class="num">{{item.cifrasPendientes ? 'Sin información' : item.participantes}}</td><td class="monto-ingreso">{{item.cifrasPendientes ? 'Sin información' : (item.ingresos | currency:'USD')}}</td><td class="monto-egreso">{{item.cifrasPendientes ? 'Sin información' : (item.egresos | currency:'USD')}}</td><td class="monto-utilidad">{{item.cifrasPendientes ? 'Sin información' : (item.utilidad | currency:'USD')}}</td></tr>}@empty{<tr><td colspan="7" class="estado-vacio">{{loading ? 'Cargando informe económico...' : 'No hay planificaciones que coincidan con los filtros.'}}</td></tr>}
+      @if(items.length){<tr class="fila-total"><td colspan="3">TOTAL</td><td class="num">{{totals.participantes}}</td><td class="monto-ingreso">{{totals.ingresos | currency:'USD'}}</td><td class="monto-egreso">{{totals.egresos | currency:'USD'}}</td><td class="monto-utilidad">{{totals.utilidad | currency:'USD'}}</td></tr>}
+      @if(annualView){<tr class="fila-total"><td colspan="5">GASTOS DE PERSONAL CEC</td><td class="monto-egreso">{{totals.gastosPersonal | currency:'USD'}}</td><td><button type="button" class="cec-action" [disabled]="saving" (click)="beginOverhead()">Editar gastos</button></td></tr><tr class="fila-total"><td colspan="6">UTILIDAD CEC {{reportYear}}:</td><td class="monto-utilidad">{{totals.utilidadCec | currency:'USD'}}</td></tr>}
+    </tbody></table></div>
+  </div>}@else{<div id="vistaDetalle" style="display:block">
+    <button id="btnVolverResumen" type="button" [disabled]="saving" (click)="back()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>Volver al resumen</button>
+    <div class="tarjeta-curso"><h2>CURSO: {{detail.nombreCurso | uppercase}}</h2><div class="fila-dato"><span class="etiqueta">Especialistas:</span><span>{{detail.especialista || 'Sin especificar en Excel'}}</span></div><div class="fila-dato"><span class="etiqueta">Coordinador(a):</span><span>{{detail.coordinador || 'Sin especificar en Excel'}}</span></div><div class="fila-dato"><span class="etiqueta">Inicio / Fin:</span><span>{{detail.fechaInicio ? (detail.fechaInicio | date:'dd/MM/yyyy') : 'Sin especificar'}} / {{detail.fechaFin ? (detail.fechaFin | date:'dd/MM/yyyy') : 'Sin especificar'}}</span></div><div class="fila-dato"><span class="etiqueta">Participantes:</span><span>{{detail.cifrasPendientes ? 'Sin información' : detail.participantes}}</span></div></div>
+    @if(detail.observacion){<p class="cec-note">{{detail.observacion}}</p>}
+    <div class="titulo-seccion">Ingresos</div><p class="cec-note">Puede editar la cantidad de participantes de cada fila con los botones + / -. El valor se mantiene según el tipo de participante y el total de la fila se recalcula como cantidad × valor; el TOTAL INGRESOS va sumando fila por fila.</p><div class="tabla-envoltorio" style="border-radius:0 0 10px 10px;margin-bottom:22px"><table><thead><tr><th>Detalle</th><th class="num">Cantidad de participantes</th><th>Valor</th><th>Total</th><th>Acciones</th></tr></thead><tbody>@for(line of detail.ingresos;track (line.id ?? $index)){<tr><td>{{line.detalle}}</td><td class="num">{{line.cantidad}}@if(line.cantidadManual){<span class="cec-note" style="margin-left:6px">(editado)</span>}</td><td>{{line.valorUnitario == null ? 'Sin especificar' : (line.valorUnitario | currency:'USD')}}</td><td>{{line.total | currency:'USD'}}</td><td>@if(line.editable){<button type="button" class="cec-action" [disabled]="saving" (click)="beginIncome(line)">Editar cantidad</button>}@if(line.cantidadManual){<button type="button" class="cec-action" [disabled]="saving" (click)="resetIncome(line)">Restablecer</button>}</td></tr>}<tr class="fila-total"><td colspan="3">TOTAL INGRESOS</td><td>{{detail.cifrasPendientes ? 'Sin información' : (detail.ingresosTotal | currency:'USD')}}</td><td></td></tr></tbody></table></div>
+    <div class="titulo-seccion">Egresos</div><button type="button" class="cec-action" [disabled]="saving || detail.cifrasPendientes" (click)="beginExpense()">＋ Agregar egreso</button><p class="cec-note">El pago a especialistas se modifica en Planificaciones. Las filas manuales se conservan al actualizar los participantes; las filas históricas originales no se alteran automáticamente. Solo se pueden eliminar las filas agregadas manualmente.</p><div class="tabla-envoltorio" style="border-radius:0 0 10px 10px;margin-bottom:0"><table><thead><tr><th>Detalle</th><th>Cantidad</th><th>Valor</th><th>Total</th><th>Acciones</th></tr></thead><tbody>@for(line of detail.egresos;track line.id){<tr><td>{{line.concepto}}</td><td>{{line.cantidad}}</td><td>{{line.valorUnitario == null ? 'Sin especificar' : (line.valorUnitario | currency:'USD')}}</td><td>{{line.total | currency:'USD'}}</td><td>@if(line.editable){<button type="button" class="cec-action" [disabled]="saving" (click)="beginExpense(line)">Editar</button><button type="button" class="cec-action peligro" [disabled]="saving" (click)="removeExpense(line)">Eliminar</button>}</td></tr>}<tr class="fila-total"><td colspan="3">TOTAL EGRESOS</td><td>{{detail.cifrasPendientes ? 'Sin información' : (detail.egresosTotal | currency:'USD')}}</td><td></td></tr></tbody></table></div>
+    <div class="caja-utilidad"><span class="etiqueta">UTILIDAD</span><span class="monto">{{detail.cifrasPendientes ? 'Sin información' : (detail.utilidad | currency:'USD')}}</span></div>
+  </div>}
+
+  @if(editingOverhead){<div class="cec-modal-fondo" (click)="onOverheadBackdrop($event)"><div class="cec-modal-tarjeta"><button type="button" class="cec-cerrar-modal" title="Cerrar" (click)="editingOverhead=false">×</button>
+    <h2>Gastos de personal CEC</h2><p class="subt">Gasto administrativo del año {{reportYear}}, se descuenta del total para calcular la utilidad CEC.</p>
+    @if(error){<div id="mensajeFormError" role="alert" style="display:block">{{error}}</div>}
+    <form #gastosForm="ngForm" (ngSubmit)="saveOverhead(gastosForm)" novalidate>
+      <div class="campo-form"><label>Gastos de personal CEC ({{reportYear}}) ($)</label><input name="importe" type="number" min="0" max="9999999999.99" step="0.01" [(ngModel)]="overheadAmount" required autofocus /></div>
+      <button type="submit" class="cec-modal-btn-guardar" [disabled]="saving">{{saving ? 'Guardando...' : 'Guardar gastos'}}</button>
+      <button type="button" class="cec-modal-btn-cancelar" [disabled]="saving" (click)="editingOverhead=false">Cancelar</button>
+    </form>
+  </div></div>}
+
+  @if(incomeForm; as i){<div class="cec-modal-fondo" (click)="onIncomeBackdrop($event)"><div class="cec-modal-tarjeta"><button type="button" class="cec-cerrar-modal" title="Cerrar" (click)="incomeForm=undefined">×</button>
+    <h2>Editar cantidad de participantes</h2><p class="subt">{{i.detalle}}</p>
+    @if(error){<div id="mensajeFormError" role="alert" style="display:block">{{error}}</div>}
+    <form #ingresoForm="ngForm" (ngSubmit)="saveIncome(ingresoForm)" novalidate>
+      <div class="campo-form"><label>Cantidad de participantes</label>
+        <div class="cec-contador">
+          <button type="button" title="Restar un participante" [disabled]="saving || (i.cantidad ?? 0) <= 0" (click)="decrementIncome()">－</button>
+          <input class="cec-control" name="cantidadIngreso" type="number" min="0" max="1000000" step="1" [(ngModel)]="i.cantidad" required />
+          <button type="button" title="Sumar un participante" [disabled]="saving || (i.cantidad ?? 0) >= 1000000" (click)="incrementIncome()">＋</button>
+        </div>
+      </div>
+      <div class="campo-form"><label>Valor por participante ($)</label><input type="number" [value]="i.valorUnitario" readonly /></div>
+      <p class="cec-note">Subtotal de la fila: {{incomePreview | currency:'USD'}} · TOTAL INGRESOS quedaría en {{incomeTotalPreview | currency:'USD'}}</p>
+      <button type="submit" class="cec-modal-btn-guardar" [disabled]="saving">{{saving ? 'Guardando...' : 'Guardar cantidad'}}</button>
+      <button type="button" class="cec-modal-btn-cancelar" [disabled]="saving" (click)="incomeForm=undefined">Cancelar</button>
+    </form>
+  </div></div>}
+
+  @if(expenseForm; as f){<div class="cec-modal-fondo" (click)="onExpenseBackdrop($event)"><div class="cec-modal-tarjeta"><button type="button" class="cec-cerrar-modal" title="Cerrar" (click)="expenseForm=undefined">×</button>
+    <h2>{{f.id ? 'Editar egreso' : 'Agregar egreso'}}</h2><p class="subt">Completa los datos del egreso manual de esta planificación.</p>
+    @if(error){<div id="mensajeFormError" role="alert" style="display:block">{{error}}</div>}
+    <form #egresoForm="ngForm" (ngSubmit)="saveExpense(egresoForm)" novalidate>
+      <div class="campo-form"><label>Detalle</label><input name="concepto" [(ngModel)]="f.concepto" maxlength="100" required autofocus /></div>
+      <div class="campo-form"><label>Cantidad</label><input name="cantidad" type="number" min="1" max="1000000" step="1" [(ngModel)]="f.cantidad" required /></div>
+      <div class="campo-form"><label>Valor unitario ($)</label><input name="valorUnitario" type="number" min="0" max="99999999.99" step="0.01" [(ngModel)]="f.valorUnitario" required /></div>
+      <button type="submit" class="cec-modal-btn-guardar" [disabled]="saving">{{saving ? 'Guardando...' : 'Guardar egreso'}}</button>
+      <button type="button" class="cec-modal-btn-cancelar" [disabled]="saving" (click)="expenseForm=undefined">Cancelar</button>
+    </form>
+  </div></div>}
+</div></main></div>

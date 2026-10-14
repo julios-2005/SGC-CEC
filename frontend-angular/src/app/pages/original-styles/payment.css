@@ -1,0 +1,100 @@
+/* Extraído sin rediseño desde pago-seguro.html. */
+main.contenido-pago {
+        max-width: 760px;
+        margin: 32px auto 56px;
+        width: calc(100% - 32px);
+      }
+
+      .tarjeta-pago {
+        background: var(--celeste-carta);
+        border: 1px solid var(--borde);
+        border-radius: 12px;
+        padding: 28px 30px 32px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      .tarjeta-pago h1 {
+        font-size: 22px;
+        color: var(--azul-950);
+        margin: 0 0 6px;
+      }
+
+      .tarjeta-pago p.subtitulo {
+        margin: 0 0 24px;
+        color: var(--texto-suave);
+        font-size: 14px;
+      }
+
+      .video-envoltorio {
+        position: relative;
+        width: 100%;
+        background: #000;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .video-envoltorio video {
+        display: block;
+        width: 100%;
+        max-height: 420px;
+        background: #000;
+      }
+
+      .video-no-disponible {
+        padding: 60px 20px;
+        text-align: center;
+        color: #fff;
+        font-size: 14px;
+      }
+
+      .nota-video {
+        margin: 14px 0 0;
+        font-size: 13px;
+        color: var(--texto-suave);
+      }
+
+      .separador-pago {
+        margin: 28px 0;
+        border: none;
+        border-top: 1px solid var(--borde);
+      }
+
+      .btn-pago-externo {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 14px 20px;
+        background: var(--azul-900);
+        color: #fff;
+        font-family: var(--fuente-subtitulo);
+        font-weight: 700;
+        font-size: 15px;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: background 0.2s ease;
+      }
+
+      .btn-pago-externo:hover {
+        background: var(--azul-800);
+      }
+
+      .btn-volver {
+        display: inline-block;
+        margin-top: 18px;
+        font-size: 13px;
+        color: var(--azul-800);
+        text-decoration: none;
+      }
+
+      .btn-volver:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 640px) {
+        .tarjeta-pago {
+          padding: 22px 18px 26px;
+        }
+      }
+    

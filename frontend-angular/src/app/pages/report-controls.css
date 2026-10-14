@@ -1,0 +1,35 @@
+/* Solo controles nuevos; el CSS original permanece intacto. */
+.cec-control { font: inherit; padding: 8px 10px; border: 1px solid var(--borde, #d7dde5); border-radius: 6px; max-width: 100%; }
+.cec-action { font: inherit; border: 1px solid var(--borde, #d7dde5); border-radius: 6px; padding: 7px 10px; cursor: pointer; color: var(--azul-900, #15395d); background: #fff; margin: 3px; }
+.cec-action:disabled { opacity: .55; cursor: wait; }
+.cec-action.peligro { color: var(--error, #b0413e); border-color: #f0c9c6; }
+.cec-edit { display: flex; align-items: end; gap: 10px; flex-wrap: wrap; padding: 16px 0; }
+.cec-edit label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; }
+.cec-note { color: var(--texto-suave, #526275); font-size: 13px; line-height: 1.5; }
+/* Cantidad de participantes centrada: tabla resumen del informe económico y
+   tabla de ingresos del detalle de cada planificación. */
+.contenedor-informe th.num, .contenedor-informe td.num { text-align: center; }
+
+/* Modal (mismo formato que Cursos/Especialistas/Coordinadores/Planificaciones) */
+.cec-modal-fondo { display: flex; position: fixed; inset: 0; background: rgba(10,17,32,.55); z-index: 999; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; }
+.cec-modal-tarjeta { background: var(--celeste-carta, #fff); border-radius: 14px; max-width: 480px; width: 100%; max-height: 90vh; max-height: 90dvh; overflow-y: auto; padding: 30px 32px; position: relative; box-shadow: 0 24px 60px -20px rgba(10,17,32,.4); }
+.cec-modal-tarjeta h2 { font-family: var(--fuente-titulo); font-size: 21px; margin: 0 0 4px; color: var(--azul-900, #002749); }
+.cec-modal-tarjeta p.subt { margin: 0 0 22px; font-size: 13px; color: var(--texto-suave, #6b7280); }
+.cec-cerrar-modal { position: absolute; top: 16px; right: 18px; background: none; border: none; font-size: 22px; cursor: pointer; color: var(--texto-suave, #6b7280); line-height: 1; }
+.cec-modal-tarjeta .campo-form { margin-bottom: 16px; }
+.cec-modal-tarjeta .campo-form label { display: block; font-size: 12.5px; font-weight: 700; color: var(--azul-900, #002749); margin-bottom: 6px; }
+.cec-modal-tarjeta .campo-form input, .cec-modal-tarjeta .campo-form select {
+  width: 100%; padding: 10px 12px; border: 1px solid var(--borde, #b9c2c3);
+  border-radius: 7px; font-size: 14px; font-family: var(--fuente-contenido);
+  background: #fff; color: var(--texto, #1c2430);
+}
+.cec-modal-tarjeta .campo-form input:focus, .cec-modal-tarjeta .campo-form select:focus { outline: none; border-color: var(--amarillo, #ffe000); box-shadow: 0 0 0 3px rgba(255, 224, 0,.15); }
+.cec-modal-btn-guardar { width: 100%; padding: 12px; background: var(--azul-900, #002749); color: #fff; border: none; border-radius: 8px; font-size: 14.5px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+.cec-modal-btn-guardar:disabled { background: #9aa7b5; cursor: not-allowed; }
+.cec-modal-btn-cancelar { width: 100%; padding: 10px; background: none; color: var(--texto-suave, #6b7280); border: 1px solid var(--borde, #b9c2c3); border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+
+/* Contador de participantes: botones - / + a los lados de la cantidad */
+.cec-contador { display: flex; align-items: center; gap: 10px; }
+.cec-contador button { width: 38px; height: 38px; flex: none; border-radius: 8px; border: 1px solid var(--borde, #b9c2c3); background: #fff; font-size: 19px; font-weight: 700; color: var(--azul-900, #002749); cursor: pointer; line-height: 1; }
+.cec-contador button:disabled { opacity: .45; cursor: not-allowed; }
+.cec-contador input { text-align: center; flex: 1; }
