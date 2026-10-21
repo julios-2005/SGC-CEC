@@ -8,6 +8,8 @@
 
 # Configuración local con secretos (no versionar nunca)
 application-local.properties
+configuracion-tic.properties.example
+
 .env
 /backend-springboot/.env.local
 
