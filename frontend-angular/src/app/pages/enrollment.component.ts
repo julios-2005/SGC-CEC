@@ -47,9 +47,9 @@ export class EnrollmentComponent implements OnInit, OnDestroy {
 
   /**
    * Categorías que se confirman con la información institucional (TIC): muestran el botón "Verificar categoría".
-   * Graduado y Persona con discapacidad NO están aquí: se revisan con el documento de respaldo. Así quien es
-   * Estudiante UPSE y además tiene discapacidad elige una sola categoría (la más favorable), y quien no consta
-   * en la base de la universidad puede acreditar su discapacidad con el carnet.
+   * Incluye Graduado (TIC lo identifica por su tipo de usuario). Persona con discapacidad NO está aquí: se revisa
+   * con el carnet de respaldo. Así quien es Estudiante UPSE y además tiene discapacidad elige una sola categoría
+   * (la más favorable), y quien no consta en la base de la universidad puede acreditar su discapacidad con el carnet.
    */
   get institutionalRequired(): boolean {
     return ['ESTUDIANTE_UPSE', 'DOCENTE_UPSE', 'ADMINISTRATIVO_UPSE', 'MAESTRANDO', 'GRADUADO'].includes(this.model.tipoUsuario);

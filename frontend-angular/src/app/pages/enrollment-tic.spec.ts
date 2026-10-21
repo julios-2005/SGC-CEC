@@ -102,9 +102,9 @@ describe('Verificación institucional en la inscripción', () => {
     expect(component.participantVerified).toBe(false);
   });
 
-  it('conserva el proceso de Externo y la revisión documental de Graduado y Persona con discapacidad', () => {
+  it('conserva el proceso de Externo y la revisión documental de Persona con discapacidad', () => {
     const { component, api } = setup();
-    for (const tipo of ['EXTERNO', 'GRADUADO', 'PERSONA_DISCAPACIDAD']) {
+    for (const tipo of ['EXTERNO', 'PERSONA_DISCAPACIDAD']) {
       component.typeChanged(tipo, document.createElement('input'));
       expect(component.institutionalRequired).toBe(false);
       expect(component.canVerifyParticipant).toBe(false);
@@ -156,15 +156,22 @@ describe('Verificación institucional en la inscripción', () => {
       expect(withDiscounts('PERSONA_DISCAPACIDAD', { ...configured, ESTUDIANTE_UPSE: 20 }).betterDiscountHint).toBe('');
     });
 
-    it('a un graduado le sugiere las categorías de mayor descuento, de la mejor a la menor', () => {
-      const hint = withDiscounts('GRADUADO').betterDiscountHint;
-      expect(hint).toContain('Estudiante UPSE (50%) o Persona con discapacidad (30%)');
+    it('a un graduado, que se confirma con TIC, no le muestra sugerencia de descuento', () => {
+      const component = withDiscounts('GRADUADO');
+      expect(component.institutionalRequired).toBe(true);
+      expect(component.documentaryReview).toBe(false);
+      expect(component.betterDiscountHint).toBe('');
+    });
+
+    it('a quien tiene discapacidad le sugiere también Graduado si su descuento es mayor', () => {
+      const hint = withDiscounts('PERSONA_DISCAPACIDAD', { ...configured, GRADUADO: 40 }).betterDiscountHint;
+      expect(hint).toContain('Estudiante UPSE (50%) o Graduado UPSE (40%)');
     });
 
     it('no sugiere nada si ya eligió el mayor descuento, si se confirma con TIC o si no cargaron los descuentos', () => {
       expect(withDiscounts('ESTUDIANTE_UPSE').betterDiscountHint).toBe('');
       expect(withDiscounts('DOCENTE_UPSE').betterDiscountHint).toBe('');
-      const component = withDiscounts('GRADUADO');
+      const component = withDiscounts('PERSONA_DISCAPACIDAD');
       component.ready = false;
       expect(component.betterDiscountHint).toBe('');
     });
@@ -191,8 +198,8 @@ describe('Verificación institucional en la inscripción', () => {
     await show('ESTUDIANTE_UPSE');
     expect(html.querySelector('#btnVerificarParticipante')).not.toBeNull();
     await show('GRADUADO');
-    expect(html.querySelector('#btnVerificarParticipante')).toBeNull();
-    expect(html.querySelector('#avisoMejorDescuento')?.textContent).toContain('Estudiante UPSE (50%)');
+    expect(html.querySelector('#btnVerificarParticipante')).not.toBeNull();
+    expect(html.querySelector('#avisoMejorDescuento')).toBeNull();
     await show('PERSONA_DISCAPACIDAD');
     expect(html.querySelector('#btnVerificarParticipante')).toBeNull();
     expect(html.querySelector('#avisoMejorDescuento')?.textContent).toContain('Estudiante UPSE (50%)');

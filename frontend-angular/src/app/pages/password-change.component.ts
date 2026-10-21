@@ -40,7 +40,10 @@ export class PasswordChangeComponent {
     this.loading = true;
     const endpoint = this.obligatorio ? 'auth/cambiar-contraseña-obligatoria' : 'auth/cambiar-contraseña';
     this.api.post<any>(endpoint, this.model).subscribe({
-      next: () => {
+      next: response => {
+        // El backend invalida los tokens anteriores al cambiar la contraseña y entrega uno nuevo:
+        // sin guardarlo, la siguiente petición cerraría la sesión.
+        if (response?.token) this.auth.replaceToken(response.token);
         this.loading = false;
         this.message = '';
         this.error = false;

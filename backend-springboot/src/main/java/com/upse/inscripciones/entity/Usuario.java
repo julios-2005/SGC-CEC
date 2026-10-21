@@ -21,6 +21,7 @@ public class Usuario {
     @Column(name = "nombre_usuario", length = 50, nullable = false)
     private String nombreUsuario;
 
+    @ToString.Exclude
     @Column(name = "contrasena", length = 255, nullable = false)
     private String contraseña;
 
@@ -55,6 +56,14 @@ public class Usuario {
     @Column(name = "debe_cambiar_contrasena", nullable = false)
     @Builder.Default
     private Boolean debeCambiarContraseña = false;
+
+    /**
+     * Se incrementa al cambiar la contraseña: los JWT emitidos antes llevan la versión
+     * anterior en el claim "tv" y dejan de ser válidos aunque no hayan vencido.
+     */
+    @Column(name = "version_token", nullable = false)
+    @Builder.Default
+    private Integer versionToken = 0;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
     private LocalDateTime fechaCreacion;
@@ -98,6 +107,9 @@ public class Usuario {
         }
         if (this.debeCambiarContraseña == null) {
             this.debeCambiarContraseña = false;
+        }
+        if (this.versionToken == null) {
+            this.versionToken = 0;
         }
     }
 

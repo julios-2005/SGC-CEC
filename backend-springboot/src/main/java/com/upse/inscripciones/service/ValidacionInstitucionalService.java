@@ -16,14 +16,12 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class ValidacionInstitucionalService {
-    // Categorías que se confirman con TIC. Graduado y Persona con discapacidad NO
-    // están aquí a propósito:
-    // la API no informa quién es graduado, y la discapacidad se revisa siempre con
-    // el carnet adjunto.
-    // Así quien es Estudiante UPSE y además tiene discapacidad elige UNA categoría
-    // (la más favorable) y
-    // quien no consta en la base de la universidad puede acreditar su discapacidad
-    // con el documento.
+    // Categorías que se confirman con TIC (incluye Graduado, que TIC identifica con
+    // el valor de `tipoUsuario` configurado en app.tics.tipos-graduado).
+    // Persona con discapacidad NO está aquí a propósito: la discapacidad se revisa
+    // siempre con el carnet adjunto. Así quien es Estudiante UPSE y además tiene
+    // discapacidad elige UNA categoría (la más favorable) y quien no consta en la
+    // base de la universidad puede acreditar su discapacidad con el documento.
     private static final Set<TipoUsuario> TIPOS_TIC = Set.of(
             TipoUsuario.ESTUDIANTE_UPSE,
             TipoUsuario.DOCENTE_UPSE,
@@ -106,7 +104,7 @@ public class ValidacionInstitucionalService {
             throw TicsClient.respuestaInvalida();
         }
 
-        return "GRADUADO".equals(normalizar(tipoApi.asText()));
+        return contiene(properties.getTiposGraduado(), normalizar(tipoApi.asText()));
     }
 
     private boolean esPersonal(JsonNode row, boolean docente) {

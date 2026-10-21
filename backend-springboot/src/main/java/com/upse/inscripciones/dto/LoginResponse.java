@@ -1,5 +1,6 @@
 package com.upse.inscripciones.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,5 +29,8 @@ public class LoginResponse {
         private String nombre; // Nombre completo del coordinador
         private String foto;
         private String rol;
+        /** Versión de token del usuario; solo viaja dentro del JWT, nunca en el JSON de respuesta. */
+        @JsonIgnore
+        private Integer versionToken;
     }
 }

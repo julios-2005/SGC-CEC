@@ -31,6 +31,11 @@ export class AuthService {
     return sessionStorage.getItem(AuthService.TOKEN_KEY);
   }
 
+  /** Reemplaza el token de la sesión actual (p. ej. tras cambiar la contraseña). */
+  replaceToken(token: string): void {
+    sessionStorage.setItem(AuthService.TOKEN_KEY, token);
+  }
+
   isAuthenticated(): boolean {
     return Boolean(this.token() && this.user());
   }

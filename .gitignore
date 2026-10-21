@@ -17,3 +17,8 @@ application-local.properties
 .vscode/
 
 /backend-springboot/configuracion-tic.properties
+
+# Frontend: dependencias, caché y salida de compilación
+/frontend-angular/node_modules/
+/frontend-angular/.angular/
+/frontend-angular/dist/

@@ -52,6 +52,16 @@ class CambioContrasenaServiceTest {
     }
 
     @Test
+    void cambiarContraseñaInvalidaLosTokensAnterioresSubiendoLaVersion() {
+        assertThat(usuario.getVersionToken()).isZero();
+
+        Usuario devuelto = servicio.cambiarContraseña(5L, peticion(ACTUAL, "Nueva12345", "Nueva12345"));
+
+        assertThat(devuelto).isSameAs(usuario);
+        assertThat(usuario.getVersionToken()).isEqualTo(1);
+    }
+
+    @Test
     void cambiarObligatoriaTambienGuardaElHashNuevo() {
         servicio.cambiarContraseñaObligatoria(5L, peticion(ACTUAL, "Nueva12345", "Nueva12345"));
 

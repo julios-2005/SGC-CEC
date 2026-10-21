@@ -20,7 +20,7 @@ public class CambioContrasenaService {
     /**
      * Cambia la contraseña del usuario logueado
      */
-    public void cambiarContraseña(Long usuarioId, CambioContrasenaRequest request) {
+    public Usuario cambiarContraseña(Long usuarioId, CambioContrasenaRequest request) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
@@ -45,13 +45,15 @@ public class CambioContrasenaService {
         // Actualizar contraseña
         usuario.setContraseña(authService.encriptarContraseña(request.getContraseñaNueva()));
         usuario.setDebeCambiarContraseña(false); // Ya no necesita cambiarla
+        invalidarSesionesAnteriores(usuario);
         usuarioRepository.save(usuario);
+        return usuario;
     }
 
     /**
      * Cambia la contraseña obligatoriamente (en primer login)
      */
-    public void cambiarContraseñaObligatoria(Long usuarioId, CambioContrasenaRequest request) {
+    public Usuario cambiarContraseñaObligatoria(Long usuarioId, CambioContrasenaRequest request) {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
 
@@ -75,6 +77,18 @@ public class CambioContrasenaService {
         // Actualizar contraseña
         usuario.setContraseña(authService.encriptarContraseña(request.getContraseñaNueva()));
         usuario.setDebeCambiarContraseña(false);
+        invalidarSesionesAnteriores(usuario);
         usuarioRepository.save(usuario);
+        return usuario;
+    }
+
+    /**
+     * Un cambio de contraseña cierra todas las sesiones abiertas con la anterior
+     * (por ejemplo, un token robado): sube la versión que exige el filtro JWT.
+     * La sesión actual recibe un token nuevo en la respuesta del controlador.
+     */
+    private void invalidarSesionesAnteriores(Usuario usuario) {
+        int actual = usuario.getVersionToken() == null ? 0 : usuario.getVersionToken();
+        usuario.setVersionToken(actual + 1);
     }
 }

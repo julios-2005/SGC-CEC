@@ -119,6 +119,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
+            // Un cambio de contraseña incrementa la versión de token del usuario:
+            // los JWT emitidos antes (p. ej. una sesión robada) dejan de valer.
+            // Los tokens sin claim "tv" se tratan como versión 0.
+            Integer tvToken = claims.get("tv", Integer.class);
+            int versionToken = usuario.getVersionToken() == null ? 0 : usuario.getVersionToken();
+            if ((tvToken == null ? 0 : tvToken) != versionToken) {
+                if (esPublica) {
+                    filterChain.doFilter(request, response);
+                } else {
+                    responder(response, HttpServletResponse.SC_UNAUTHORIZED, "Tu sesión ya no es válida. Inicia sesión nuevamente.");
+                }
+                return;
+            }
+
             // El rol y el estado actuales prevalecen sobre un token emitido horas antes.
             List<GrantedAuthority> autoridades = List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()));
             var autenticacion = new UsernamePasswordAuthenticationToken(usuario.getNombreUsuario(), null, autoridades);

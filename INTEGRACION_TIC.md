@@ -40,12 +40,12 @@ En producción se puede usar `deployment/backend.env.example` como referencia pa
 ## Uso del formulario
 
 1. Selecciona la categoría, el curso y escribe el documento de identidad.
-2. Para estudiante, docente, administrativo o maestrando, pulsa **Verificar categoría**. Graduado y Persona con discapacidad no tienen ese botón: se revisan con el documento de respaldo (carnet de discapacidad o certificado de graduado) y el formulario muestra su descuento de inmediato.
+2. Para estudiante, docente, administrativo, maestrando o graduado, pulsa **Verificar categoría**. Persona con discapacidad no tiene ese botón: se revisa con el carnet de respaldo y el formulario muestra su descuento de inmediato.
 3. Si se confirma, el formulario muestra el descuento y los datos de pago del curso. Completa los campos y adjunta los documentos que ya exige el sistema.
 4. Envía la inscripción. El backend verifica nuevamente la categoría y continúa con el proceso habitual si la confirma.
 
 Cambiar el documento o la categoría elimina la comprobación anterior. Una consulta negativa o un fallo de TIC impide enviar con esa categoría; el formulario permite corregir datos y reintentar. No se cambia a la persona automáticamente a Externo.
-Externo mantiene su proceso habitual. Graduado mantiene la revisión documental porque la respuesta disponible no tiene un indicador de graduación.
+Externo mantiene su proceso habitual. Graduado se confirma con TIC mediante el valor de `tipoUsuario` configurado en `app.tics.tipos-graduado`; además se adjunta el certificado, como en las demás categorías.
 
 ### Un solo descuento por inscripción
 
@@ -53,7 +53,7 @@ Los descuentos no se acumulan: se aplica únicamente el de la categoría elegida
 
 Por eso Persona con discapacidad **no se confirma con TIC**: quien consta en la base de la universidad elige la categoría institucional que más le convenga (que sí se verifica), y quien no consta acredita su discapacidad con el carnet, que revisa el CEC manualmente.
 
-El formulario muestra bajo «Tipo de Usuario» un aviso de descuento único. Para Graduado y Persona con discapacidad añade una sugerencia con las categorías que tengan un descuento mayor, tomando los porcentajes de los descuentos activos del CEC (no están escritos en el código; si el CEC los cambia, el aviso se actualiza solo).
+El formulario muestra bajo «Tipo de Usuario» un aviso de descuento único. Para Persona con discapacidad añade una sugerencia con las categorías que tengan un descuento mayor, tomando los porcentajes de los descuentos activos del CEC (no están escritos en el código; si el CEC los cambia, el aviso se actualiza solo).
 
 ## Reglas y contrato observado
 
@@ -66,23 +66,26 @@ TIC devolvió HTTP 200 con un arreglo JSON y una identificación textual por reg
 | `DOCENTE_UPSE` | `tipoUsuario` coincide con el catálogo de tipos docentes, o es `Personal upse` y `cargo` coincide con el catálogo docente. |
 | `ADMINISTRATIVO_UPSE` | `tipoUsuario` coincide con el catálogo administrativo, o es `Personal upse` y `cargo` coincide con el catálogo administrativo. |
 | `PERSONA_DISCAPACIDAD` | Revisión del carnet de respaldo; no se consulta a TIC (ver «Un solo descuento por inscripción»). |
-| `GRADUADO` | Revisión del documento de respaldo; no se deduce de una matrícula inactiva. |
+| `GRADUADO` | `tipoUsuario` coincide con el catálogo de tipos de graduado (`app.tics.tipos-graduado`, por defecto `GRADUADO`). No se deduce de una matrícula inactiva ni de otras banderas. |
 | `EXTERNO` | Conserva la inscripción sin validación institucional. |
 
 La matrícula activa es el criterio implementado para estudiante y maestrando. La correspondencia entre cualquier posgrado activo y la categoría existente `MAESTRANDO` debe revisarse con el CEC si también admite otros tipos de posgrado. La API no determina por sí sola una política de descuentos.
 
 ### Valores que deben confirmarse con TIC
 
-Se comprobó la conexión real y un registro administrativo con `tipoUsuario=Personal upse` y `cargo=ANALISTA 2 DE DESARROLLO DE SISTEMAS`. Ese ejemplo incluía banderas académicas booleanas. No se contó con muestras reales positivas de estudiante, docente o posgrado.
+Se comprobó la conexión real y un registro administrativo con `tipoUsuario=Personal upse` y `cargo=ANALISTA 2 DE DESARROLLO DE SISTEMAS`. Ese ejemplo incluía banderas académicas booleanas. No se contó con muestras reales positivas de estudiante, docente, posgrado ni graduado.
 
 Los tipos docentes/administrativos y los cargos docentes del archivo de ejemplo son equivalencias iniciales propuestas. Solicita a TIC el catálogo completo y ajústalo en `configuracion-tic.properties` antes de usar esta clasificación en producción:
 
 ```properties
 app.tics.tipos-docente=DOCENTE,DOCENTE UPSE,PERSONAL ACADEMICO
 app.tics.tipos-administrativo=ADMINISTRATIVO,ADMINISTRATIVO UPSE,PERSONAL ADMINISTRATIVO
+app.tics.tipos-graduado=GRADUADO
 app.tics.cargos-docente=DOCENTE,PROFESOR,PROFESORA
 app.tics.cargos-administrativo=ANALISTA 2 DE DESARROLLO DE SISTEMAS
 ```
+
+Confirma con TIC el valor exacto que devuelve `tipoUsuario` para un graduado: si no coincide con `app.tics.tipos-graduado`, ningún graduado podrá confirmar su categoría. Para comprobarlo, haz la consulta de Postman descrita abajo con la cédula de un graduado conocido y revisa ese campo.
 
 Las listas se separan con comas y reemplazan sus valores predeterminados. Las coincidencias son exactas tras normalizar mayúsculas, acentos, espacios, guiones y guiones bajos. No se clasifica automáticamente como administrativo a todo el personal que no sea docente.
 

@@ -257,6 +257,7 @@ public class UsuarioService {
         String contraseñaTemporal = generarContraseñaTemporal();
         usuario.setContraseña(authService.encriptarContraseña(contraseñaTemporal));
         usuario.setDebeCambiarContraseña(true);
+        usuario.setVersionToken((usuario.getVersionToken() == null ? 0 : usuario.getVersionToken()) + 1);
         usuarioRepository.save(usuario);
 
         return RestablecerContrasenaResponse.builder()

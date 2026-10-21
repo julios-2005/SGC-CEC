@@ -90,12 +90,50 @@ class ValidacionInstitucionalServiceTest {
         assertThat(service.validar("1234567890", ESTUDIANTE_UPSE).verificado()).isTrue();
     }
 
-    @Test void graduadoYExternoConservanElFlujoDocumental() {
-        for (TipoUsuario tipo : List.of(EXTERNO, GRADUADO, PERSONA_DISCAPACIDAD)) {
+    @Test void externoYDiscapacidadConservanElFlujoSinConsultarATic() {
+        for (TipoUsuario tipo : List.of(EXTERNO, PERSONA_DISCAPACIDAD)) {
             assertThat(service.validar("1234567890", tipo).requiereConsulta()).isFalse();
             service.validarParaInscripcion("1234567890", tipo);
         }
         verifyNoInteractions(client);
+    }
+
+    @Test void graduadoSeConfirmaConTicPorSuTipoDeUsuario() throws Exception {
+        assertThat(ValidacionInstitucionalService.requiereConsulta(GRADUADO)).isTrue();
+        response("{\"tipoUsuario\":\"Graduado\"}");
+        var respuesta = service.validar("1234567890", GRADUADO);
+        assertThat(respuesta.requiereConsulta()).isTrue();
+        assertThat(respuesta.verificado()).isTrue();
+        assertThat(respuesta.estado()).isEqualTo("CONFIRMADO");
+        service.validarParaInscripcion("1234567890", GRADUADO);
+    }
+
+    @Test void graduadoNoSeDeduceDeOtrosTiposNiDeUnaMatriculaInactiva() throws Exception {
+        response("{\"tipoUsuario\":\"Personal upse\",\"estudianteGrado\":true,\"matriculaGradoActiva\":false}");
+        assertThat(service.validar("1234567890", GRADUADO).verificado()).isFalse();
+        assertThatThrownBy(() -> service.validarParaInscripcion("1234567890", GRADUADO))
+                .isInstanceOf(ValidacionException.class);
+    }
+
+    @Test void graduadoSinRegistroEnTicNoSePuedeInscribir() throws Exception {
+        when(client.consultar("1234567890")).thenReturn(List.of());
+        assertThat(service.validar("1234567890", GRADUADO).estado()).isEqualTo("SIN_REGISTRO");
+        assertThatThrownBy(() -> service.validarParaInscripcion("1234567890", GRADUADO))
+                .isInstanceOf(ValidacionException.class);
+    }
+
+    @Test void elValorDeGraduadoEsConfigurableYNormalizaAcentosYSeparadores() throws Exception {
+        config.setTiposGraduado(List.of("EGRESADO TITULADO"));
+        response("{\"tipoUsuario\":\"egresado_titulado\"}");
+        assertThat(service.validar("1234567890", GRADUADO).verificado()).isTrue();
+        response("{\"tipoUsuario\":\"Graduado\"}");
+        assertThat(service.validar("1234567890", GRADUADO).verificado()).isFalse();
+    }
+
+    @Test void graduadoSinTipoDeUsuarioEnLaRespuestaEsUnFormatoInesperado() throws Exception {
+        response("{\"estudianteGrado\":false}");
+        assertThatThrownBy(() -> service.validar("1234567890", GRADUADO))
+                .isInstanceOf(ConsultaInstitucionalException.class);
     }
 
     @Test void sinRegistroNoConfirmaCategoriaYBloqueaInscripcion() {
@@ -115,5 +153,22 @@ class ValidacionInstitucionalServiceTest {
         limiter.comprobar("ip-a"); limiter.comprobar("ip-a");
         assertThatThrownBy(() -> limiter.comprobar("ip-a")).isInstanceOf(ConsultaInstitucionalException.class);
         assertThatCode(() -> limiter.comprobar("ip-b")).doesNotThrowAnyException();
+    }
+
+    @Test void limitaConsultasPorDiaYPorIp() {
+        config.setConsultasPorMinuto(100);
+        config.setConsultasPorDia(3);
+        var limiter = new ConsultaInstitucionalRateLimiter(config);
+        for (int i = 0; i < 3; i++) limiter.comprobar("ip-a", "100000000" + i);
+        assertThatThrownBy(() -> limiter.comprobar("ip-a", "1000000009")).isInstanceOf(ConsultaInstitucionalException.class);
+        assertThatCode(() -> limiter.comprobar("ip-b", "1000000009")).doesNotThrowAnyException();
+    }
+
+    @Test void limitaConsultasDeUnMismoDocumentoDesdeCualquierIp() {
+        config.setConsultasPorDocumentoHora(2);
+        var limiter = new ConsultaInstitucionalRateLimiter(config);
+        limiter.comprobar("ip-a", "1234567890"); limiter.comprobar("ip-b", "1234567890");
+        assertThatThrownBy(() -> limiter.comprobar("ip-c", "1234567890")).isInstanceOf(ConsultaInstitucionalException.class);
+        assertThatCode(() -> limiter.comprobar("ip-c", "0987654321")).doesNotThrowAnyException();
     }
 }

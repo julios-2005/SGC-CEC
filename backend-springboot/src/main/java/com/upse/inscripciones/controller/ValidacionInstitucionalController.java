@@ -21,7 +21,7 @@ public class ValidacionInstitucionalController {
     @PostMapping
     public ResponseEntity<ValidacionInstitucionalResponse> consultar(
             @Valid @RequestBody ValidacionInstitucionalRequest body, HttpServletRequest request) {
-        limite.comprobar(request.getRemoteAddr());
+        limite.comprobar(request.getRemoteAddr(), body.identificacion());
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
                 .body(service.validar(body.identificacion(), body.tipoUsuario()));
     }

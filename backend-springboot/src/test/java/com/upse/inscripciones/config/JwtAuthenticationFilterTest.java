@@ -84,6 +84,21 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
+    void unTokenEmitidoAntesDeCambiarLaContrasenaYaNoVale() throws Exception {
+        user.setVersionToken(1); // la contraseña se cambió después de emitir el token (versión 0)
+        assertThat(call("/api/cursos").getStatus()).isEqualTo(401);
+    }
+
+    @Test
+    void unTokenConLaVersionVigenteSigueValiendo() throws Exception {
+        JwtService jwt = new JwtService("clave-exclusiva-de-pruebas-unitarias-no-produccion-2026", 60000);
+        user.setVersionToken(2);
+        token = jwt.generarToken(LoginResponse.UsuarioLogueadoDTO.builder()
+                .id(1L).nombreUsuario("prueba").nombre("Prueba").rol("COORDINADOR").versionToken(2).build());
+        assertThat(call("/api/cursos").getStatus()).isEqualTo(200);
+    }
+
+    @Test
     void contrasenaTemporalSoloPermiteElFlujoDeCambioYLasRutasPublicas() throws Exception {
         user.setDebeCambiarContraseña(true);
         MockHttpServletResponse response = call("/api/cursos");

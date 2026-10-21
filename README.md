@@ -16,15 +16,19 @@ App sobre la gestión de inscripciones y capacitaciones del Centro de Educación
 SGC-CEC/
 ├── backend-springboot/   # API REST en Spring Boot
 ├── frontend-angular/     # Aplicación Angular
-├── deployment/           # Archivos de configuración para despliegue (Nginx, systemd, etc.)
-└── database/             # Scripts / recursos de base de datos
+├── deployment/           # Configuración de despliegue (Nginx del frontend y del API, systemd, variables)
+├── Documentos-tecnicos/  # Documentación técnica
+├── INTEGRACION_TIC.md    # Integración con la API institucional de TIC
+└── uploads/              # Archivos subidos por los usuarios (datos personales; nunca se versiona)
 ```
+
+Las migraciones de base de datos están en `backend-springboot/src/main/resources/db/migration` (Flyway).
 
 ## Requisitos previos
 
 - Java 17
 - Maven
-- Node.js y Angular CLI
+- Node.js 22.22.3 o superior (ver `frontend-angular/.nvmrc`)
 - PostgreSQL
 
 ## Configuración del backend
@@ -42,13 +46,36 @@ SGC-CEC/
    ```bash
    mvn spring-boot:run
    ```
+5. Crea el primer administrador: la aplicación no siembra usuarios. Genera una contraseña temporal y su hash con
+   `python3 scripts/generar_usuario_admin.py` (requiere `pip install bcrypt`) y úsalo en
+   `src/main/resources/plantilla_usuario_admin.sql.example`. El usuario deberá cambiar la contraseña en su primer ingreso.
+
+### Pruebas
+
+```bash
+mvn verify                                   # backend
+cd ../frontend-angular && npm ci && npx ng test --watch=false   # frontend
+```
+
+### Producción detrás de un proxy
+
+Arquitectura de dominio único (`https://sgccec.upse.edu.ec`): Nginx sirve Angular y reenvía `/api` al backend
+(ver `deployment/nginx-frontend.conf`). Variables de entorno relevantes (ver `deployment/backend.env.example`):
+`FORWARD_HEADERS_STRATEGY=native`, `TRUSTED_PROXIES` (IP del Nginx) y `SERVER_ADDRESS` (IP privada del backend). Sin ellas, todas las peticiones
+parecen venir de la IP del proxy y los límites de intentos de login y de consultas a TIC se comparten entre todos los usuarios.
+`SHOW_SQL` debe quedar en `false`.
+
+### Sesiones
+
+El JWT lleva un claim `tv` (versión de token del usuario). Al cambiar o restablecer la contraseña la versión sube y las
+sesiones anteriores dejan de ser válidas; el cambio devuelve un token nuevo para la sesión actual.
 
 ## Configuración del frontend
 
 1. Ve a `frontend-angular/`.
 2. Instala las dependencias:
    ```bash
-   npm install
+   npm ci
    ```
 3. Levanta el servidor de desarrollo:
    ```bash

@@ -56,7 +56,7 @@ public class InscripcionController {
             jakarta.servlet.http.HttpServletRequest request) {
 
         if (com.upse.inscripciones.service.ValidacionInstitucionalService.requiereConsulta(tipoUsuario)) {
-            consultaInstitucionalRateLimiter.comprobar(request.getRemoteAddr());
+            consultaInstitucionalRateLimiter.comprobar(request.getRemoteAddr(), cedula);
         }
 
         InscripcionResponse response = inscripcionService.registrarInscripcion(

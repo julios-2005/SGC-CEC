@@ -99,6 +99,29 @@ class AuthServiceTest {
     }
 
     @Test
+    void unUsuarioDesactivadoConContraseñaIncorrectaNoRevelaQueExiste() {
+        when(repo.findByNombreUsuario("ana")).thenReturn(Optional.of(usuario(false)));
+
+        LoginResponse respuesta = auth.validarCredenciales(peticion("ana", "Otra12345"));
+
+        assertThat(respuesta.getExito()).isFalse();
+        assertThat(respuesta.getMensaje()).isEqualTo("Usuario o contraseña incorrectos");
+    }
+
+    @Test
+    void elTokenDeSesionLlevaLaVersionActualPeroNoSeSerializa() throws Exception {
+        Usuario u = usuario(true);
+        u.setVersionToken(3);
+        when(repo.findByNombreUsuario("ana")).thenReturn(Optional.of(u));
+
+        LoginResponse respuesta = auth.validarCredenciales(peticion("ana", CLAVE));
+
+        assertThat(respuesta.getUsuario().getVersionToken()).isEqualTo(3);
+        String json = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(respuesta.getUsuario());
+        assertThat(json).doesNotContain("versionToken");
+    }
+
+    @Test
     void unUsuarioNuloSeTrataComoInexistente() {
         assertThat(auth.validarCredenciales(peticion(null, CLAVE)).getExito()).isFalse();
     }

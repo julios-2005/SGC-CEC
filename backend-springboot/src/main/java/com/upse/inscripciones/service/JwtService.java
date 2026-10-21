@@ -36,6 +36,7 @@ public class JwtService {
                 .claim("nombre", usuario.getNombre())
                 .claim("foto", usuario.getFoto())
                 .claim("rol", usuario.getRol())
+                .claim("tv", usuario.getVersionToken() == null ? 0 : usuario.getVersionToken())
                 .issuedAt(Date.from(ahora))
                 .expiration(Date.from(ahora.plusMillis(expirationMs)))
                 .signWith(key)

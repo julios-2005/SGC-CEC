@@ -85,6 +85,8 @@ public class SecurityConfig implements WebMvcConfigurer {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                // CSRF desactivado a proposito: la API es sin estado y autentica con un JWT en el header
+                // Authorization (no con cookies), asi que el navegador no adjunta credenciales por si solo.
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> {})
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

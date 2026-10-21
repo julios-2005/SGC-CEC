@@ -66,7 +66,6 @@ export class UsersComponent implements OnInit, OnDestroy {
   roleChanged(): void { if (!this.showCoordinatorSelect) this.form.idCoordinador = null; }
   get missingCoordinator(): Usuario | undefined { return this.editing?.coordinadorId && !this.coordinators.some(item => item.id === this.editing!.coordinadorId) ? this.editing : undefined; }
   save(ngForm: NgForm): void {
-    console.log('SAVE LLAMADO', { invalido: ngForm.invalid, form: this.form, saving: this.saving });
     if (this.saving) return;
     this.error = '';
     if (ngForm.invalid || !String(this.form.nombreUsuario).trim() || (this.coordinatorRequired && !this.form.idCoordinador)) {

@@ -3,6 +3,7 @@ package com.upse.inscripciones.controller;
 import com.upse.inscripciones.dto.CambioContrasenaRequest;
 import com.upse.inscripciones.dto.LoginRequest;
 import com.upse.inscripciones.dto.LoginResponse;
+import com.upse.inscripciones.entity.Usuario;
 import com.upse.inscripciones.service.AuthService;
 import com.upse.inscripciones.service.CambioContrasenaService;
 import com.upse.inscripciones.service.JwtService;
@@ -88,11 +89,19 @@ public class AuthController {
                 public final Boolean exito = false;
             });
         }
-        if (obligatorio) cambioContraseñaService.cambiarContraseñaObligatoria(usuarioId, request);
-        else cambioContraseñaService.cambiarContraseña(usuarioId, request);
+        Usuario actualizado = obligatorio
+                ? cambioContraseñaService.cambiarContraseñaObligatoria(usuarioId, request)
+                : cambioContraseñaService.cambiarContraseña(usuarioId, request);
+        // El cambio invalida los tokens anteriores; se entrega uno nuevo para que
+        // quien cambió la contraseña no pierda su sesión actual.
+        final String nuevoToken = jwtService.generarToken(authService.aDto(actualizado));
+        final long expiraEn = jwtService.getExpiraEnSegundos();
         return ResponseEntity.ok(new Object() {
             public final String mensaje = "Contraseña cambiada exitosamente";
             public final Boolean exito = true;
+            public final String token = nuevoToken;
+            public final String tipoToken = "Bearer";
+            public final Long expiraEnSegundos = expiraEn;
         });
     }
 
