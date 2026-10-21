@@ -24,3 +24,6 @@ configuracion-tic.properties.example
 /frontend-angular/node_modules/
 /frontend-angular/.angular/
 /frontend-angular/dist/
+
+# Configuración TIC (no versionar)
+backend-springboot/configuracion-tic.properties.example
